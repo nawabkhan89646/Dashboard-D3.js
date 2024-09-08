@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Combined D3.js Graphs on One Page</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    
+    .chart-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 20px;
+      margin: 20px;
+    }
+
+    .chart {
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+
+    /* Styles for Bar Chart */
+    .bar {
+      fill: steelblue;
+    }
+    .bar:hover {
+      fill: orange;
+    }
+
+    /* Styles for Line Chart */
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 2px;
+    }
+
+    /* Styles for Pie Chart */
+    .slice {
+      stroke: white;
+    }
+
+    /* Styles for Scatter Plot */
+    .dot {
+      fill: steelblue;
+      stroke: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Graphs</h1>
+  <div class="chart-container">
+    <!-- Bar Chart -->
+    <div class="chart">
+      <svg id="barChart" width="500" height="300"></svg>
+    </div>
+
+    <!-- Line Chart -->
+    <div class="chart">
+      <svg id="lineChart" width="500" height="300"></svg>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="chart">
+      <svg id="pieChart" width="300" height="300"></svg>
+    </div>
+
+    <!-- Scatter Plot -->
+    <div class="chart">
+      <svg id="scatterPlot" width="500" height="300"></svg>
+    </div>
+  </div>
+
+  <script>
+    // Bar Chart
+    (function() {
+      const data = [25, 15, 35, 40, 50, 30, 20];
+      const svg = d3.select("#barChart");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+
+      const xScale = d3.scaleBand()
+        .domain(data.map((d, i) => i))
+        .range([0, width])
+        .padding(0.2);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data)])
+        .nice()
+        .range([height, 0]);
+
+      svg.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", (d, i) => xScale(i))
+        .attr("y", d => yScale(d))
+        .attr("width", xScale.bandwidth())
+        .attr("height", d => height - yScale(d));
+    })();
+
+    // Line Chart
+    (function() {
+      const data = [10, 30, 20, 50, 40, 60, 70];
+      const svg = d3.select("#lineChart");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+
+      const xScale = d3.scaleLinear()
+        .domain([0, data.length - 1])
+        .range([0, width]);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data)])
+        .range([height, 0]);
+
+      const line = d3.line()
+        .x((d, i) => xScale(i))
+        .y(d => yScale(d));
+
+      svg.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("d", line);
+    })();
+
+    // Pie Chart
+    (function() {
+      const data = [10, 20, 30, 40];
+      const svg = d3.select("#pieChart");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+      const radius = Math.min(width, height) / 2;
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      const pie = d3.pie();
+      const arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius);
+
+      const g = svg.append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+      g.selectAll(".slice")
+        .data(pie(data))
+        .enter().append("path")
+        .attr("class", "slice")
+        .attr("d", arc)
+        .attr("fill", (d, i) => color(i));
+    })();
+
+    // Scatter Plot
+    (function() {
+      const data = [
+        { x: 30, y: 20 },
+        { x: 70, y: 80 },
+        { x: 110, y: 60 },
+        { x: 150, y: 100 },
+        { x: 200, y: 30 },
+      ];
+
+      const svg = d3.select("#scatterPlot");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+
+      const xScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.x)])
+        .range([0, width]);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.y)])
+        .range([height, 0]);
+
+      svg.selectAll(".dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("class", "dot")
+        .attr("cx", d => xScale(d.x))
+        .attr("cy", d => yScale(d.y))
+        .attr("r", 5);
+    })();
+  </script>
+</body>
+</html>
